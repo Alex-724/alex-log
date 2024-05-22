@@ -23,10 +23,11 @@
     "typescript",
     "nodejs"
   ],
-  "dependencies": {},
   "devDependencies": {
-    "typescript": "^4.0.0",
     "@types/node": "^14.0.0",
-    "ts-node": "^9.0.0"
+    "eslint": "^9.3.0",
+    "prettier": "^3.2.5",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.0"
   }
 }
