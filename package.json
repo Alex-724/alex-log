@@ -1,0 +1,32 @@
+{
+  "name": "alex-log",
+  "version": "1.0.0",
+  "description": "A flexible and configurable logging library for Node.js with TypeScript support.",
+  "main": "src/test.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node src/test.js",
+    "dev": "ts-node src/index.ts",
+    "test": "ts-node src/test.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "author": "alex-724",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alex-724/alex-log.git"
+  },
+  "keywords": [
+    "logging",
+    "logger",
+    "typescript",
+    "nodejs"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^4.0.0",
+    "@types/node": "^14.0.0",
+    "ts-node": "^9.0.0"
+  }
+}
