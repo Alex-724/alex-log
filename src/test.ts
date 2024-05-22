@@ -1,4 +1,4 @@
-import Logger from '../dist/Logger';
+import Logger from './Logger';
 
 const logger = new Logger({
     logDir: 'logs',
