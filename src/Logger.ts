@@ -10,7 +10,7 @@ interface LoggerOptions {
 
 type LogLevel = 'error' | 'info' | 'debug' | 'warn' | 'log';
 
-class Logger {
+export class Logger {
     private logDir: string;
     private format: 'plain' | 'json';
     private maxFileSize: number;
