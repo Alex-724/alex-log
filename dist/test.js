@@ -15,8 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Logger_1 = __importDefault(require("./Logger"));
 const logger = new Logger_1.default({
     logDir: 'logs',
-    format: 'plain',
-    maxFileSize: 5 * 1024 * 1024,
+    format: 'plain', // 'plain' or 'json'
+    maxFileSize: 5 * 1024 * 1024, // 5 MB
     environment: 'development' // 'development' or 'production'
 });
 function testLogger() {
@@ -26,6 +26,10 @@ function testLogger() {
         yield logger.debug('This is a debug log');
         yield logger.warn('This is a warning log');
         yield logger.log('This is a general log');
+        const infoLogs = yield logger.getLogs('info');
+        console.log('Info Logs:', infoLogs);
+        const errorLogs = yield logger.getLogs('error');
+        console.log('Error Logs:', errorLogs);
     });
 }
 testLogger().catch(console.error);

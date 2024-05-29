@@ -21,6 +21,20 @@ class Logger {
         this.format = options.format || 'plain';
         this.maxFileSize = options.maxFileSize || 5 * 1024 * 1024; // 5 MB
         this.environment = options.environment || 'development';
+        
+        // Bind methods to ensure correct context
+        this.error = this.error.bind(this);
+        this.info = this.info.bind(this);
+        this.debug = this.debug.bind(this);
+        this.warn = this.warn.bind(this);
+        this.log = this.log.bind(this);
+        this.getLogs = this.getLogs.bind(this);
+        this._log = this._log.bind(this);
+        this._getFilePath = this._getFilePath.bind(this);
+        this._formatLog = this._formatLog.bind(this);
+        this._rotateLogIfNeeded = this._rotateLogIfNeeded.bind(this);
+        this._appendLog = this._appendLog.bind(this);
+        this._readLog = this._readLog.bind(this);
     }
 
     async error(text: string): Promise<void> {
