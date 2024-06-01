@@ -2,8 +2,7 @@
   "name": "alex-log",
   "version": "1.0.6",
   "description": "A flexible and configurable logging library for Node.js with TypeScript support.",
-  "main": "./dist/Logger.ts",
-  "types": "dist/Logger.d.ts",
+  "main": "./src/Logger.ts",
   "type": "module",
   "scripts": {
     "build": "tsc",
@@ -41,6 +40,7 @@
   },
   "exports": {
     ".": {
+      "types": "./src/Types/Logger.d.ts",
       "require": "./dist/index.js"
     }
   }
