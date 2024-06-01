@@ -1,6 +1,6 @@
 {
   "name": "alex-log",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A flexible and configurable logging library for Node.js with TypeScript support.",
   "main": "./src/Logger.ts",
   "type": "module",
