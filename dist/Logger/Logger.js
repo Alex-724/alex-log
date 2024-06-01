@@ -1,27 +1,3 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -31,10 +7,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-const fs_1 = require("fs");
-const path = __importStar(require("path"));
-class Logger {
+import { promises as fs } from 'fs';
+import * as path from 'path';
+export class Logger {
     constructor(options = {}) {
         this.logDir = options.logDir || 'log';
         this.format = options.format || 'plain';
@@ -109,10 +84,10 @@ class Logger {
     _rotateLogIfNeeded(filePath) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const stats = yield fs_1.promises.stat(filePath);
+                const stats = yield fs.stat(filePath);
                 if (stats.size >= this.maxFileSize) {
                     const newPath = `${filePath}.${Date.now()}`;
-                    yield fs_1.promises.rename(filePath, newPath);
+                    yield fs.rename(filePath, newPath);
                 }
             }
             catch (err) {
@@ -125,7 +100,7 @@ class Logger {
     _appendLog(filePath, text) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                yield fs_1.promises.appendFile(filePath, `${text}\n`);
+                yield fs.appendFile(filePath, `${text}\n`);
             }
             catch (err) {
                 console.error(`Failed to write to ${filePath}. Ensure the log folder exists.`);
@@ -135,7 +110,7 @@ class Logger {
     _readLog(filePath, date) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield fs_1.promises.readFile(filePath, 'utf8');
+                const data = yield fs.readFile(filePath, 'utf8');
                 if (date) {
                     return data.split('\n').filter(line => line.includes(date)).join('\n');
                 }
@@ -148,4 +123,4 @@ class Logger {
         });
     }
 }
-exports.default = Logger;
+export default Logger;
