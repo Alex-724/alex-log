@@ -1,12 +1,11 @@
 {
   "name": "alex-log",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A flexible and configurable logging library for Node.js with TypeScript support.",
-  "main": "./dist/Logger.ts",
-  "types": "dist/Logger.d.ts",
+  "main": "./src/Logger.ts",
   "type": "module",
   "scripts": {
-    "build": "rollup -c",
+    "build": "tsc",
     "start": "node dist/test.js",
     "dev": "ts-node src/index.ts",
     "test": "npx tsx --tsconfig ./tsconfig.json ./ts.ts",
@@ -25,9 +24,6 @@
     "nodejs"
   ],
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.8",
-    "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^15.2.3",
     "@types/node": "^14.0.0",
     "eslint": "^9.3.0",
     "prettier": "^3.2.5",
@@ -37,7 +33,6 @@
     "typescript": "^4.0.0"
   },
   "dependencies": {
-    "@rollup/plugin-typescript": "^11.1.6",
     "chalk": "^5.3.0",
     "npm-check-updates": "^16.14.20",
     "pkg-dir": "^8.0.0",
@@ -45,8 +40,8 @@
   },
   "exports": {
     ".": {
-      "require": "./dist/index.cjs",
-      "import": "./index.ts"
+      "types": "./src/Types/Logger.d.ts",
+      "require": "./dist/index.js"
     }
   }
 }

@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 import * as path from 'path';
 
-interface LoggerOptions {
+interface LoggerTypes {
     logDir?: string;
     format?: 'plain' | 'json';
     maxFileSize?: number;
@@ -16,7 +16,7 @@ export class Logger {
     private maxFileSize: number;
     private environment: 'development' | 'production';
 
-    constructor(options: LoggerOptions = {}) {
+    constructor(options: LoggerTypes = {}) {
         this.logDir = options.logDir || 'log';
         this.format = options.format || 'plain';
         this.maxFileSize = options.maxFileSize || 5 * 1024 * 1024; // 5 MB

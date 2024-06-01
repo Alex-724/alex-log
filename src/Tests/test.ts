@@ -1,4 +1,4 @@
-import Logger from './Logger';
+import Logger from '../Logger/Logger.js';
 
 const logger = new Logger({
   logDir: 'logs',
