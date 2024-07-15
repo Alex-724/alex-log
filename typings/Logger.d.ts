@@ -1,21 +1,21 @@
 type LogLevel = 'error' | 'info' | 'debug' | 'warn' | 'log';
 
-interface BackupOptions {
+export interface BackupOptions {
     time: number;
     path?: string;
 }
 
-interface ClearLogsOptions {
+export interface ClearLogsOptions {
     time: number;
     whiteList?: LogLevel[];
 }
 
-interface ExternalLogOptions {
+export interface ExternalLogOptions {
     url: string;
     headers?: Record<string, string>;
 }
 
-interface LoggerOptions {
+export interface LoggerOptions {
     logDir?: string;
     format?: 'plain' | 'json';
     maxFileSize?: number;

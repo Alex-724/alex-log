@@ -1,31 +1,8 @@
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import axios from 'axios';
+import { BackupOptions, ClearLogsOptions, ExternalLogOptions, LoggerOptions } from '../../typings/Logger.js';
 
-interface BackupOptions {
-    time: number;
-    path?: string;
-}
-
-interface ClearLogsOptions {
-    time: number;
-    whiteList?: LogLevel[];
-}
-
-interface ExternalLogOptions {
-    url: string;
-    headers?: Record<string, string>;
-}
-
-interface LoggerTypes {
-    logDir?: string;
-    format?: 'plain' | 'json';
-    maxFileSize?: number;
-    environment?: 'development' | 'production';
-    backup?: BackupOptions;
-    clearLogs?: ClearLogsOptions;
-    externalLog?: ExternalLogOptions;
-}
 
 type LogLevel = 'error' | 'info' | 'debug' | 'warn' | 'log';
 
@@ -38,7 +15,7 @@ export class Logger {
     private clearLogs?: ClearLogsOptions;
     private externalLog?: ExternalLogOptions;
 
-    constructor(options: LoggerTypes = {}) {
+    constructor(options: LoggerOptions = {}) {
         this.logDir = options.logDir || 'log';
         this.format = options.format || 'plain';
         this.maxFileSize = options.maxFileSize || 5 * 1024 * 1024; // 5 MB
@@ -167,11 +144,12 @@ export class Logger {
 
     private _setupBackup(): void {
         const timeout = this.backup!.time;
-        setInterval(async () => {
+        const setInterval(async () => {
             await this._performBackup();
         }, timeout);
+        
     }
-
+    
     private async _performBackup(): Promise<void> {
         const backupDir = this.backup!.path || path.join(this.logDir, 'backup');
         try {
