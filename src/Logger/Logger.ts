@@ -1,11 +1,23 @@
 import { promises as fs } from 'fs';
 import * as path from 'path';
 
+interface BackupOptions {
+    time: number;
+    path?: string;
+}
+
+interface ClearLogsOptions {
+    time: number;
+    whiteList?: LogLevel[];
+}
+
 interface LoggerTypes {
     logDir?: string;
     format?: 'plain' | 'json';
     maxFileSize?: number;
     environment?: 'development' | 'production';
+    backup?: BackupOptions;
+    clearLogs?: ClearLogsOptions;
 }
 
 type LogLevel = 'error' | 'info' | 'debug' | 'warn' | 'log';
@@ -15,13 +27,17 @@ export class Logger {
     private format: 'plain' | 'json';
     private maxFileSize: number;
     private environment: 'development' | 'production';
+    private backup?: BackupOptions;
+    private clearLogs?: ClearLogsOptions;
 
     constructor(options: LoggerTypes = {}) {
         this.logDir = options.logDir || 'log';
         this.format = options.format || 'plain';
         this.maxFileSize = options.maxFileSize || 5 * 1024 * 1024; // 5 MB
         this.environment = options.environment || 'development';
-        
+        this.backup = options.backup;
+        this.clearLogs = options.clearLogs;
+
         // Bind methods to ensure correct context
         this.error = this.error.bind(this);
         this.info = this.info.bind(this);
@@ -35,6 +51,15 @@ export class Logger {
         this._rotateLogIfNeeded = this._rotateLogIfNeeded.bind(this);
         this._appendLog = this._appendLog.bind(this);
         this._readLog = this._readLog.bind(this);
+        this._setupBackup = this._setupBackup.bind(this);
+        this._performBackup = this._performBackup.bind(this);
+        this._setupAutoClear = this._setupAutoClear.bind(this);
+        this._clearLogs = this._clearLogs.bind(this);
+
+        // Set up backup if options are provided
+        if (this.backup) {
+            this._setupBackup();
+        }
     }
 
     async error(text: string): Promise<void> {
@@ -118,6 +143,51 @@ export class Logger {
         } catch (err) {
             console.error(`Failed to read from ${filePath}. Ensure the log folder exists.`);
             return '';
+        }
+    }
+
+    private _setupBackup(): void {
+        const timeout = this.backup!.time;
+        setInterval(async () => {
+            await this._performBackup();
+        }, timeout);
+    }
+
+    private async _performBackup(): Promise<void> {
+        const backupDir = this.backup!.path || path.join(this.logDir, 'backup');
+        try {
+            await fs.mkdir(backupDir, { recursive: true });
+            const files = await fs.readdir(this.logDir);
+            const logFiles = files.filter(file => file.endsWith('.log'));
+            for (const file of logFiles) {
+                const srcPath = path.join(this.logDir, file);
+                const destPath = path.join(backupDir, `${file}.${Date.now()}`);
+                await fs.copyFile(srcPath, destPath);
+            }
+            console.info('Logs have been backed up successfully.');
+        } catch (err) {
+            console.error(`Failed to perform backup: ${(err as Error).message}`);
+        }
+    }
+
+    private _setupAutoClear(): void {
+        const timeout = this.clearLogs!.time;
+
+        setInterval(async () => {
+            await this._clearLogs();
+        }, timeout);
+    }
+
+    private async _clearLogs(): Promise<void> {
+        const whiteList = this.clearLogs!.whiteList || [];
+        const files = await fs.readdir(this.logDir);
+        const logFiles = files.filter(file => file.endsWith('.log'));
+        for (const file of logFiles) {
+            const level = file.split('.')[0] as LogLevel;
+            if (!whiteList.includes(level)) {
+                const filePath = path.join(this.logDir, file);
+                await fs.writeFile(filePath, '');
+            }
         }
     }
 }

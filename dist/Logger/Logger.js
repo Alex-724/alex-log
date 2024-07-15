@@ -15,6 +15,8 @@ export class Logger {
         this.format = options.format || 'plain';
         this.maxFileSize = options.maxFileSize || 5 * 1024 * 1024; // 5 MB
         this.environment = options.environment || 'development';
+        this.backup = options.backup;
+        this.clearLogs = options.clearLogs;
         // Bind methods to ensure correct context
         this.error = this.error.bind(this);
         this.info = this.info.bind(this);
@@ -28,6 +30,14 @@ export class Logger {
         this._rotateLogIfNeeded = this._rotateLogIfNeeded.bind(this);
         this._appendLog = this._appendLog.bind(this);
         this._readLog = this._readLog.bind(this);
+        this._setupBackup = this._setupBackup.bind(this);
+        this._performBackup = this._performBackup.bind(this);
+        this._setupAutoClear = this._setupAutoClear.bind(this);
+        this._clearLogs = this._clearLogs.bind(this);
+        // Set up backup if options are provided
+        if (this.backup) {
+            this._setupBackup();
+        }
     }
     error(text) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -119,6 +129,51 @@ export class Logger {
             catch (err) {
                 console.error(`Failed to read from ${filePath}. Ensure the log folder exists.`);
                 return '';
+            }
+        });
+    }
+    _setupBackup() {
+        const timeout = this.backup.time;
+        setInterval(() => __awaiter(this, void 0, void 0, function* () {
+            yield this._performBackup();
+        }), timeout);
+    }
+    _performBackup() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const backupDir = this.backup.path || path.join(this.logDir, 'backup');
+            try {
+                yield fs.mkdir(backupDir, { recursive: true });
+                const files = yield fs.readdir(this.logDir);
+                const logFiles = files.filter(file => file.endsWith('.log'));
+                for (const file of logFiles) {
+                    const srcPath = path.join(this.logDir, file);
+                    const destPath = path.join(backupDir, `${file}.${Date.now()}`);
+                    yield fs.copyFile(srcPath, destPath);
+                }
+                console.info('Logs have been backed up successfully.');
+            }
+            catch (err) {
+                console.error(`Failed to perform backup: ${err.message}`);
+            }
+        });
+    }
+    _setupAutoClear() {
+        const timeout = this.clearLogs.time;
+        setInterval(() => __awaiter(this, void 0, void 0, function* () {
+            yield this._clearLogs();
+        }), timeout);
+    }
+    _clearLogs() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const whiteList = this.clearLogs.whiteList || [];
+            const files = yield fs.readdir(this.logDir);
+            const logFiles = files.filter(file => file.endsWith('.log'));
+            for (const file of logFiles) {
+                const level = file.split('.')[0];
+                if (!whiteList.includes(level)) {
+                    const filePath = path.join(this.logDir, file);
+                    yield fs.writeFile(filePath, '');
+                }
             }
         });
     }
