@@ -33,6 +33,8 @@ declare class Logger {
     warn(text: string): Promise<void>;
     log(text: string): Promise<void>;
     getLogs(level: LogLevel, date?: string): Promise<string>;
+    stopBackup(): boolean;
+    stopClearLogs(): boolean;
 }
 
 export default Logger;

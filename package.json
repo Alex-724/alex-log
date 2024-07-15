@@ -1,6 +1,6 @@
 {
   "name": "alex-log",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "A flexible and configurable logging library for Node.js with TypeScript support.",
   "main": "./src/Logger.ts",
   "type": "module",
@@ -9,7 +9,8 @@
     "start": "node dist/test.js",
     "dev": "ts-node src/index.ts",
     "test": "npx tsx --tsconfig ./tsconfig.json ./tests/test.ts",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "publish": "npm publish"
   },
   "author": "alex-724",
   "license": "ISC",

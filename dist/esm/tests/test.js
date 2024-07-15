@@ -8,14 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import Logger from '../src/Logger/Logger.js';
-const logger = new Logger({
-    logDir: 'logs',
-    format: 'plain',
-    maxFileSize: 5 * 1024 * 1024,
-    environment: 'development'
-});
 function testLogger() {
     return __awaiter(this, void 0, void 0, function* () {
+        const logger = new Logger({
+            logDir: 'logs',
+            format: 'plain',
+            maxFileSize: 5 * 1024 * 1024,
+            environment: 'development'
+        });
         yield logger.info('This is an info log');
         yield logger.error('This is an error log');
         yield logger.debug('This is a debug log');
@@ -27,4 +27,30 @@ function testLogger() {
         console.log('Error Logs:', errorLogs);
     });
 }
+function testBackupAndClearLog() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const logger = new Logger({
+            logDir: 'logs',
+            backup: {
+                time: 30 * 1000,
+                path: 'backup_logs'
+            },
+            clearLogs: {
+                time: 31 * 1000,
+                whiteList: ['error']
+            }
+        });
+        const testInterval = setInterval((index) => __awaiter(this, void 0, void 0, function* () {
+            yield logger.info('This is an info log' + index);
+            yield logger.error('This is an error log' + index);
+            yield logger.debug('This is a debug log' + index);
+            yield logger.warn('This is a warning log' + index);
+            yield logger.log('This is a general log' + index);
+        }), 2000);
+        setTimeout(() => {
+            clearInterval(testInterval);
+        }, 60 * 1000);
+    });
+}
 testLogger().catch(console.error);
+testBackupAndClearLog().catch(console.error);

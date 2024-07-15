@@ -14,6 +14,9 @@ export class Logger {
     private backup?: BackupOptions;
     private clearLogs?: ClearLogsOptions;
     private externalLog?: ExternalLogOptions;
+    //Intervals
+    private backupInterval?: NodeJS.Timeout;
+    private logsInterval?: NodeJS.Timeout;
 
     constructor(options: LoggerOptions = {}) {
         this.logDir = options.logDir || 'log';
@@ -23,6 +26,8 @@ export class Logger {
         this.backup = options.backup;
         this.clearLogs = options.clearLogs;
         this.externalLog = options.externalLog;
+        this.backupInterval = undefined;
+        this.logsInterval = undefined;
 
         // Bind methods to ensure correct context
         this.error = this.error.bind(this);
@@ -31,6 +36,8 @@ export class Logger {
         this.warn = this.warn.bind(this);
         this.log = this.log.bind(this);
         this.getLogs = this.getLogs.bind(this);
+        this.stopBackup = this.stopBackup.bind(this);
+        this.stopClearLogs = this.stopClearLogs.bind(this);
         this._log = this._log.bind(this);
         this._getFilePath = this._getFilePath.bind(this);
         this._formatLog = this._formatLog.bind(this);
@@ -76,6 +83,22 @@ export class Logger {
 
     async getLogs(level: LogLevel, date?: string): Promise<string> {
         return await this._readLog(this._getFilePath(level), date);
+    }
+
+    stopBackup(): boolean {
+        if (this.backupInterval !== undefined) {
+            clearInterval(this.backupInterval);
+            return true;
+        }
+        return false;
+    }
+
+    stopClearLogs(): boolean {
+        if (this.logsInterval !== undefined) {
+            clearInterval(this.logsInterval);
+            return true;
+        }
+        return false;
     }
 
     private async _log(level: LogLevel, text: string): Promise<void> {
@@ -144,10 +167,9 @@ export class Logger {
 
     private _setupBackup(): void {
         const timeout = this.backup!.time;
-        const setInterval(async () => {
+        this.backupInterval = setInterval(async () => {
             await this._performBackup();
         }, timeout);
-        
     }
     
     private async _performBackup(): Promise<void> {
@@ -170,7 +192,7 @@ export class Logger {
     private _setupAutoClear(): void {
         const timeout = this.clearLogs!.time;
 
-        setInterval(async () => {
+        this.logsInterval = setInterval(async () => {
             await this._clearLogs();
         }, timeout);
     }

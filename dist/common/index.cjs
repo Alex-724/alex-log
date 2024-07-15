@@ -44,12 +44,16 @@ class Logger {
         this.backup = options.backup;
         this.clearLogs = options.clearLogs;
         this.externalLog = options.externalLog;
+        this.backupInterval = undefined;
+        this.logsInterval = undefined;
         this.error = this.error.bind(this);
         this.info = this.info.bind(this);
         this.debug = this.debug.bind(this);
         this.warn = this.warn.bind(this);
         this.log = this.log.bind(this);
         this.getLogs = this.getLogs.bind(this);
+        this.stopBackup = this.stopBackup.bind(this);
+        this.stopClearLogs = this.stopClearLogs.bind(this);
         this._log = this._log.bind(this);
         this._getFilePath = this._getFilePath.bind(this);
         this._formatLog = this._formatLog.bind(this);
@@ -97,6 +101,20 @@ class Logger {
         return __awaiter$1(this, void 0, void 0, function* () {
             return yield this._readLog(this._getFilePath(level), date);
         });
+    }
+    stopBackup() {
+        if (this.backupInterval !== undefined) {
+            clearInterval(this.backupInterval);
+            return true;
+        }
+        return false;
+    }
+    stopClearLogs() {
+        if (this.logsInterval !== undefined) {
+            clearInterval(this.logsInterval);
+            return true;
+        }
+        return false;
     }
     _log(level, text) {
         return __awaiter$1(this, void 0, void 0, function* () {
@@ -166,7 +184,7 @@ class Logger {
     }
     _setupBackup() {
         const timeout = this.backup.time;
-        setInterval(() => __awaiter$1(this, void 0, void 0, function* () {
+        this.backupInterval = setInterval(() => __awaiter$1(this, void 0, void 0, function* () {
             yield this._performBackup();
         }), timeout);
     }
@@ -191,7 +209,7 @@ class Logger {
     }
     _setupAutoClear() {
         const timeout = this.clearLogs.time;
-        setInterval(() => __awaiter$1(this, void 0, void 0, function* () {
+        this.logsInterval = setInterval(() => __awaiter$1(this, void 0, void 0, function* () {
             yield this._clearLogs();
         }), timeout);
     }
