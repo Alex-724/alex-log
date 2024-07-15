@@ -10,6 +10,11 @@ interface ClearLogsOptions {
     whiteList?: LogLevel[];
 }
 
+interface ExternalLogOptions {
+    url: string;
+    headers?: Record<string, string>;
+}
+
 interface LoggerOptions {
     logDir?: string;
     format?: 'plain' | 'json';
@@ -17,6 +22,7 @@ interface LoggerOptions {
     environment?: 'development' | 'production';
     backup?: BackupOptions;
     clearLogs?: ClearLogsOptions;
+    externalLog?: ExternalLogOptions;
 }
 
 declare class Logger {
@@ -26,8 +32,7 @@ declare class Logger {
     debug(text: string): Promise<void>;
     warn(text: string): Promise<void>;
     log(text: string): Promise<void>;
-    getLogs(level: string, date?: string): Promise<string>;
-    getLogFiles(): Promise<string[]>;
+    getLogs(level: LogLevel, date?: string): Promise<string>;
 }
 
 export default Logger;

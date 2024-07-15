@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { promises as fs } from 'fs';
 import * as path from 'path';
+import axios from 'axios';
 export class Logger {
     constructor(options = {}) {
         this.logDir = options.logDir || 'log';
@@ -17,6 +18,7 @@ export class Logger {
         this.environment = options.environment || 'development';
         this.backup = options.backup;
         this.clearLogs = options.clearLogs;
+        this.externalLog = options.externalLog;
         // Bind methods to ensure correct context
         this.error = this.error.bind(this);
         this.info = this.info.bind(this);
@@ -34,9 +36,14 @@ export class Logger {
         this._performBackup = this._performBackup.bind(this);
         this._setupAutoClear = this._setupAutoClear.bind(this);
         this._clearLogs = this._clearLogs.bind(this);
+        this._sendToExternalLog = this._sendToExternalLog.bind(this);
         // Set up backup if options are provided
         if (this.backup) {
             this._setupBackup();
+        }
+        // Set up automatic log clearing if options are provided
+        if (this.clearLogs) {
+            this._setupAutoClear();
         }
     }
     error(text) {
@@ -79,6 +86,9 @@ export class Logger {
             console[level](formattedText);
             yield this._rotateLogIfNeeded(filePath);
             yield this._appendLog(filePath, formattedText);
+            if (this.externalLog) {
+                yield this._sendToExternalLog(level, formattedText);
+            }
         });
     }
     _getFilePath(level) {
@@ -174,6 +184,23 @@ export class Logger {
                     const filePath = path.join(this.logDir, file);
                     yield fs.writeFile(filePath, '');
                 }
+            }
+        });
+    }
+    _sendToExternalLog(level, message) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.externalLog)
+                return;
+            try {
+                yield axios.post(this.externalLog.url, {
+                    level,
+                    message
+                }, {
+                    headers: this.externalLog.headers
+                });
+            }
+            catch (err) {
+                console.error(`Failed to send log to external stack: ${err.message}`);
             }
         });
     }

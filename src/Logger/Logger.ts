@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs';
 import * as path from 'path';
+import axios from 'axios';
 
 interface BackupOptions {
     time: number;
@@ -11,6 +12,11 @@ interface ClearLogsOptions {
     whiteList?: LogLevel[];
 }
 
+interface ExternalLogOptions {
+    url: string;
+    headers?: Record<string, string>;
+}
+
 interface LoggerTypes {
     logDir?: string;
     format?: 'plain' | 'json';
@@ -18,6 +24,7 @@ interface LoggerTypes {
     environment?: 'development' | 'production';
     backup?: BackupOptions;
     clearLogs?: ClearLogsOptions;
+    externalLog?: ExternalLogOptions;
 }
 
 type LogLevel = 'error' | 'info' | 'debug' | 'warn' | 'log';
@@ -29,6 +36,7 @@ export class Logger {
     private environment: 'development' | 'production';
     private backup?: BackupOptions;
     private clearLogs?: ClearLogsOptions;
+    private externalLog?: ExternalLogOptions;
 
     constructor(options: LoggerTypes = {}) {
         this.logDir = options.logDir || 'log';
@@ -37,6 +45,7 @@ export class Logger {
         this.environment = options.environment || 'development';
         this.backup = options.backup;
         this.clearLogs = options.clearLogs;
+        this.externalLog = options.externalLog;
 
         // Bind methods to ensure correct context
         this.error = this.error.bind(this);
@@ -55,10 +64,16 @@ export class Logger {
         this._performBackup = this._performBackup.bind(this);
         this._setupAutoClear = this._setupAutoClear.bind(this);
         this._clearLogs = this._clearLogs.bind(this);
+        this._sendToExternalLog = this._sendToExternalLog.bind(this);
 
         // Set up backup if options are provided
         if (this.backup) {
             this._setupBackup();
+        }
+
+        // Set up automatic log clearing if options are provided
+        if (this.clearLogs) {
+            this._setupAutoClear();
         }
     }
 
@@ -97,6 +112,10 @@ export class Logger {
         (console[level] as (message?: any, ...optionalParams: any[]) => void)(formattedText);
         await this._rotateLogIfNeeded(filePath);
         await this._appendLog(filePath, formattedText);
+
+        if (this.externalLog) {
+            await this._sendToExternalLog(level, formattedText);
+        }
     }
 
     private _getFilePath(level: LogLevel): string {
@@ -188,6 +207,21 @@ export class Logger {
                 const filePath = path.join(this.logDir, file);
                 await fs.writeFile(filePath, '');
             }
+        }
+    }
+
+    private async _sendToExternalLog(level: LogLevel, message: string): Promise<void> {
+        if (!this.externalLog) return;
+
+        try {
+            await axios.post(this.externalLog.url, {
+                level,
+                message
+            }, {
+                headers: this.externalLog.headers
+            });
+        } catch (err) {
+            console.error(`Failed to send log to external stack: ${(err as Error).message}`);
         }
     }
 }
